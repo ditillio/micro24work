@@ -1,0 +1,328 @@
+---
+schema: EconSchema
+version: 1
+params:
+- name: a
+  value: '1'
+  min: '1'
+  max: '3'
+- name: b
+  value: '1'
+  min: '1'
+  max: '3'
+- name: w
+  value: '10'
+  min: '1'
+  max: '18'
+  round: '0.01'
+- name: M
+  value: '50'
+  min: '0'
+  max: '100'
+  round: '10'
+- name: L
+  value: 6
+  max: 14
+  round: 1
+- name: p
+  value: 1
+  max: 1.5
+  min: 0.5
+  round: 0.01
+- name: showBuySell
+  value: true
+calcs:
+  wealth: ( 14 * (params.w) ) + params.M
+  consumptionEndowment: params.M / params.p
+  leisure: (14 - params.L)
+  consumption: (params.M + params.w*params.L) / params.p
+  maxconsumption: (params.M + params.w*14) / params.p
+  wageIncome: params.w*params.L
+  wageconsumption: (params.w*params.L)/params.p
+  rN: (params.a) / ( (params.a) + (params.b) ) 
+  rC: (params.b) / ( (params.a) + (params.b) ) 
+  optchoiceNinterior: calcs.wealth * calcs.rN / params.w
+  optchoiceLinterior: -(calcs.optchoiceNinterior)+14
+  optchoiceCinterior: calcs.wealth * calcs.rC / params.p
+  optchoiceNcorner: 14 * calcs.rN
+  optchoiceCcorner: calcs.consumptionEndowment
+  maxUinterior: ( (calcs.optchoiceNinterior)^(params.a) ) * ( (calcs.optchoiceCinterior)^(params.b) )
+  maxUcorner: ((calcs.optchoiceNcorner)^(params.a))*((calcs.optchoiceCcorner)^(params.b))
+
+aspectRatio: 0.8
+
+layout:
+  type: TwoVerticalGraphsPlusSidebar
+  def:
+
+    topGraph:
+      xAxis:
+        orient: bottom
+        min: 0
+        max: 16
+        ticks: 0
+      yAxis:
+        orient: left
+        min: 0
+        max: 300
+        ticks: 0
+      objects:
+
+
+      - Label:
+            coordinates: [16, 0]
+            text: "` \\\\text{Tempo libero (ore)} `"
+            yPixelOffset: 0
+            position: l
+
+      - Label:
+            coordinates: [0, 300]
+            text: "` \\\\text{Consumo (kg)}  `"
+            xPixelOffset: -5
+
+# opt indiff curve interior
+      - Curve:
+          fn: ((calcs.maxUinterior)/((x)^(params.a)))^(1/params.b)
+          color: Black
+          strokeWidth: 1
+          show: params.w > ( params.a * params.M ) / ( 14 * params.b )
+      - Curve:
+          fn: ((0.6*calcs.maxUinterior)/((x)^(params.a)))^(1/params.b)
+          color: Black
+          strokeWidth: 1
+          show: params.w > ( params.a * params.M ) / ( 14 * params.b )
+      - Curve:
+          fn: ((1.5*calcs.maxUinterior)/((x)^(params.a)))^(1/params.b)
+          color: Black
+          strokeWidth: 1
+          show: params.w > ( params.a * params.M ) / ( 14 * params.b )
+
+# opt indiff curve corner
+      - Curve:
+          fn: ((calcs.maxUcorner)/((x)^(params.a)))^(1/params.b)
+          color: Black
+          strokeWidth: 1
+          show: params.w <= ( params.a * params.M ) / ( 14 * params.b )
+      - Curve:
+          fn: ((0.6*calcs.maxUcorner)/((x)^(params.a)))^(1/params.b)
+          color: Black
+          strokeWidth: 1
+          show: params.w <= ( params.a * params.M ) / ( 14 * params.b )
+      - Curve:
+          fn: ((1.5*calcs.maxUcorner)/((x)^(params.a)))^(1/params.b)
+          color: Black
+          strokeWidth: 1
+          show: params.w <= ( params.a * params.M ) / ( 14 * params.b )
+
+
+# budget line
+      - Line:
+          yIntercept: calcs.maxconsumption
+          max: 14
+          slope: -params.w / params.p
+          color: Blue
+          strokeWidth: 2
+
+# optimal choice interior
+
+      - Point:
+          coordinates: [calcs.optchoiceNinterior, calcs.optchoiceCinterior]
+          droplines:
+            vertical: calcs.optchoiceNinterior.toFixed(2)
+            horizontal: calcs.optchoiceCinterior.toFixed(2)
+          color: Blue
+          label:
+            text: \text{scelta ottima}
+          show: params.w > ( params.a * params.M ) / ( 14 * params.b )
+
+# optimal choice corner
+
+      - Point:
+          coordinates: [calcs.optchoiceNcorner, calcs.optchoiceCcorner]
+          droplines:
+            vertical: calcs.optchoiceNcorner.toFixed(2)
+            horizontal: calcs.optchoiceCcorner.toFixed(2)
+          color: Blue
+          label:
+            text: \text{scelta ottima = situazione iniziale}
+          show: params.w <= ( params.a * params.M ) / ( 14 * params.b )
+
+# shadow point max consumption
+
+      - Point:
+          coordinates: [0, calcs.maxconsumption]
+          droplines:
+            vertical: 0
+            horizontal: "`(M_0+WT)/P = ${ calcs.maxconsumption.toFixed(2) } `"
+          color: Black
+          r: 0
+
+# endowment point
+
+      - type: EconBundle
+        def:
+          name: endowmentBundle
+          coordinates:
+          - 14
+          - calcs.consumptionEndowment
+          droplines:
+            vertical: "`T=14`"
+            horizontal: "`M_0/P = ${ calcs.consumptionEndowment.toFixed(2) } `"
+          color: Black
+          label:
+            text: \text{situazione iniziale}
+            position: l
+          show: params.w > ( params.a * params.M ) / ( 14 * params.b )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    bottomGraph:
+      xAxis:
+        orient: bottom
+        min: 0
+        max: 16
+        ticks: 0
+      yAxis:
+        orient: left
+        min: 0
+        max: 20
+        ticks: 0
+      objects:
+
+
+      - Label:
+            coordinates: [16, 0]
+            text: "` \\\\text{Tempo libero (ore)} `"
+            yPixelOffset: 0
+            position: l
+
+      - Label:
+            coordinates: [0, 20]
+            text: "` \\\\text{Salario (euro/ora)}  `"
+            xPixelOffset: -5
+
+
+# leisure demand function
+      - Curve:
+          fn: calcs.rN * params.M / ( (x) - 14*calcs.rN )
+          color: Blue
+          strokeWidth: 2.5
+          max: 14
+          min: calcs.rN * 14
+          label:
+            text: \text{domanda di tempo libero}
+            x: calcs.rN*(14+params.M/15)
+            position: bl
+      - Segment:
+          a: [14,0]
+          b: [14,calcs.rN * params.M / ( 14 - 14*calcs.rN )]
+          color: Blue
+          strokeWidth: 2.5
+
+
+# labor supply function
+      - Curve:
+          fn: calcs.rN * params.M / ( - (x) + 14*calcs.rC )
+          color: Red
+          strokeWidth: 2.5
+          max: calcs.rC * 14
+          label:
+            text: \text{offerta di lavoro}
+            x: ( 14 * calcs.rC ) - ( calcs.rN * params.M ) / 13.5
+            position: r
+      - Segment:
+          a: [0.03,0]
+          b: [0.03,calcs.rN * params.M / ( 14*calcs.rC )]
+          color: Red
+          strokeWidth: 2.5
+
+# optimal choice of leisure interior
+      - Point:
+          coordinates: [calcs.optchoiceNinterior, params.w]
+          droplines:
+            vertical: calcs.optchoiceNinterior.toFixed(2)
+            horizontal: params.w.toFixed(2)
+          color: Blue
+          show: params.w > ( params.a * params.M ) / ( 14 * params.b )
+
+# optimal choice of labor interior
+      - Point:
+          coordinates: [-(calcs.optchoiceNinterior)+14, params.w]
+          droplines:
+            vertical: calcs.optchoiceLinterior.toFixed(2)
+            horizontal: params.w.toFixed(2)
+          color: Red
+          show: params.w > ( params.a * params.M ) / ( 14 * params.b )
+
+# optimal choice of leisure corner
+      - Point:
+          coordinates: [14, params.w]
+          droplines:
+            vertical: 
+            horizontal: params.w.toFixed(2)
+          color: Blue
+          show: params.w <= ( params.a * params.M ) / ( 14 * params.b )
+
+# optimal choice of labor corner
+      - Point:
+          coordinates: [0.02, params.w]
+          droplines:
+            vertical: 
+            horizontal: params.w.toFixed(2)
+          color: Red
+          show: params.w <= ( params.a * params.M ) / ( 14 * params.b )
+
+# shadow point for dropline at N=T
+      - Point:
+          coordinates: [14, 1000]
+          droplines:
+            vertical: "`T=14`"
+            horizontal:
+          color: Black
+
+
+
+
+
+
+
+
+    sidebar:
+      controls:
+
+      - title: Scelta ottima e funzione di offerta di lavoro del consumatore / lavoratore
+#        description: The budget line for a worker who can choose how many hours to work at a constant wage
+
+        sliders:
+        - param: a
+          label: \alpha
+        - param: b
+          label: \beta
+        - param: w
+          label: W
+        - param: p
+          label: P
+        - param: M
+          label: M_0
+
+        divs:
+        - html: "` Dato il prezzo del bene di consumo ($P = ${params.p.toFixed(2)}$), il reddito non da lavoro
+                  ($M_0 = ${params.M}$ euro) garantisce un livello di consumo
+                  pari a $M_0/P=${calcs.consumptionEndowment.toFixed(2)}$ unità. 
+                  Lavorando $L = ${params.L}$ ore ad un salario orario di $W = ${params.w.toFixed(2)}$ euro, 
+                   si ottiene un reddito da lavoro pari 
+                   a $WL = ${calcs.wageIncome.toFixed(2)}$
+                   euro e quindi un consumo aggiuntivo di $WL/P = ${calcs.wageconsumption.toFixed(2)}$
+                   unità.   `"
