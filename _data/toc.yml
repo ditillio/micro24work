@@ -45,11 +45,8 @@ parts:
               en: Labor Supply
               it: Offerta di lavoro
           - title:
-              en: Price-Taking Firm's Labor Demand
-              it: Domanda di lavoro dell'impresa concorrenziale
-          - title:
-              en: Equilibrium in Perfectly Competitive Labor Markets
-              it: Equilibrio nei mercati del lavoro concorrenziali
+              en: Demand and Equilibrium in Perfectly Competitive Labor Markets
+              it: Domanda ed equilibrio nei mercati del lavoro concorrenziali
           - title:
               en: Monopsony in Labor Markets
               it: Monopsonio nel mercato del lavoro

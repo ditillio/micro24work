@@ -2,35 +2,21 @@
 schema: EconSchema
 version: 1
 params:
-- name: w
-  value: '10'
-  min: '5'
-  max: '15'
-  round: '0.05'
-- name: M
-  value: '50'
-  min: '0'
-  max: '100'
-  round: '10'
-- name: L
-  value: 6
-  max: 14
-  round: 1
-- name: p
-  value: 1
-  max: 1.5
-  min: 0.5
-  round: 0.05
+- {name: w, value: 35, min: 20, max: 60}
+- {name: M, value: 70, min: 0, max: 120, round: 10}
+- {name: L, value: 3, min: 0, max: 7}
+- {name: p, value: 20, min: 10, max: 30}
 calcs:
-  wealth: 14*params.w + params.M
+  wealth: 7*params.w + params.M
   consumptionEndowment: params.M / params.p
-  leisure: (14 - params.L)
+  leisure: (7 - params.L)
   consumption: (params.M + params.w*params.L) / params.p
-  maxconsumption: (params.M + params.w*14) / params.p
+  maxconsumption: (params.M + params.w*7) / params.p
   wageIncome: params.w*params.L
   wageconsumption: (params.w*params.L)/params.p
+  realwage: params.w / params.p
 
-aspectRatio: 1.5
+aspectRatio: 1.05
 
 layout:
   type: OneGraphPlusSidebar
@@ -39,24 +25,24 @@ layout:
       xAxis:
         orient: bottom
         min: 0
-        max: 16
+        max: 8
         ticks: 0
       yAxis:
         orient: left
         min: 0
-        max: 300
+        max: 32  
         ticks: 0
       objects:
 
 
       - Label:
-            coordinates: [16, 0]
-            text: "` \\\\text{Tempo libero (ore)} `"
+            coordinates: [8, 0]
+            text: "` \\\\text{Tempo  (gg)} `"
             yPixelOffset: 0
             position: l
 
       - Label:
-            coordinates: [0, 300]
+            coordinates: [0, 32]
             text: "` \\\\text{Consumo (kg)}  `"
             xPixelOffset: -5
 
@@ -64,7 +50,7 @@ layout:
 # budget line
       - Line:
           yIntercept: calcs.maxconsumption
-          max: 14
+          max: 7
           slope: -params.w / params.p
           color: Blue
           strokeWidth: 2
@@ -79,7 +65,7 @@ layout:
             - directions: x
               param: L
               expression: params.L - drag.dx
-          show: params.L > 0 && params.L < 14
+          show: params.L > 0 && params.L < 7
 
       - Point:
           coordinates: [0, calcs.maxconsumption]
@@ -93,10 +79,10 @@ layout:
         def:
           name: endowmentBundle
           coordinates:
-          - 14
+          - 7
           - calcs.consumptionEndowment
           droplines:
-            vertical: "`T=14`"
+            vertical: "`T=7`"
             horizontal: "`M_0/P = ${ calcs.consumptionEndowment.toFixed(2) } `"
           color: Black
           label:
@@ -105,11 +91,11 @@ layout:
       - type: Segment
         def:
           a:
-          - 14
-          - params.M*0.5
+          - 7
+          - params.M*0.5/params.p
           b:
           - calcs.leisure
-          - params.M*0.5
+          - params.M*0.5/params.p
 #          startArrow: true
           endArrow: true
           color: Red
@@ -123,16 +109,16 @@ layout:
         def:
           a:
           - 0
-          - params.M*0.5
+          - params.M*0.5/params.p
           b:
           - calcs.leisure
-          - params.M*0.5
+          - params.M*0.5/params.p
 #          startArrow: true
           endArrow: true
           color: Blue
           strokeWidth: 1
           label:
-            text: "`\\\\text{Tempo libero $N=${14-params.L}$}`"
+            text: "`\\\\text{Tempo libero $N=${7-params.L}$}`"
             location: 0.5
             yPixelOffset: 0
 
@@ -172,11 +158,19 @@ layout:
           label: L
 
         divs:
-        - html: "` Dato il prezzo del bene di consumo ($P = ${params.p.toFixed(2)}$), il reddito non da lavoro
-                  ($M_0 = ${params.M}$ euro) garantisce un livello di consumo
-                  pari a $M_0/P=${calcs.consumptionEndowment.toFixed(2)}$ unità. 
-                  Lavorando $L = ${params.L}$ ore ad un salario orario di $W = ${params.w.toFixed(2)}$ euro, 
+        - html: "` Il prezzo del bene di consumo è $P = ${params.p.toFixed(2)}$.   `"
+        - html: "`   `"
+        - html: "` Il reddito non da lavoro
+                  $M_0 = ${params.M}$ garantisce quindi un livello di consumo
+                  pari a $M_0/P=${calcs.consumptionEndowment.toFixed(2)}$ unità.  `"
+        - html: "`   `"
+        - html: "` Lavorando $L = ${params.L}$ giorni al salario giornaliero $W = ${params.w.toFixed(2)}$, 
                    si ottiene un reddito da lavoro pari 
                    a $WL = ${calcs.wageIncome.toFixed(2)}$
                    euro e quindi un consumo aggiuntivo di $WL/P = ${calcs.wageconsumption.toFixed(2)}$
                    unità.   `"
+        - html: "`   `"
+        - html: "` Il salario reale (valore assoluto della pendenza del vincolo di bilancio) 
+                  è $$\\\\frac{W}{P} = \\\\frac{${params.w.toFixed(2)} }{ ${params.p.toFixed(2)} } = ${calcs.realwage.toFixed(2)}$$ Ciò vuol dire che,
+                  secondo il mercato, il valore di una giornata di lavoro, misurato 
+                  in termini del bene di consumo, è pari a ${calcs.realwage.toFixed(2)} unità.   `"
